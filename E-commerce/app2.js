@@ -9,39 +9,38 @@ const cartTotal = document.querySelector('.cart-total');
 const cartContent = document.querySelector('.cart-content');
 const productsDOM = document.querySelector('.products-center');
 
-
 // cart
 let cart = [];
-// buttons
-let buttonsDOM = [];
 
-// getting the products
-class Products {
-  async getProducts(){
+
+// getting products
+class Products{
+  async getProducts() {
     try {
       let result = await fetch('products.json');
       let data = await result.json();
+      
       let products = data.items;
       products = products.map(item => {
         const {title, price} = item.fields;
         const {id} = item.sys;
         const image = item.fields.image.fields.file.url;
-        return {title, price, id, image}
-      })
+        return {title, price, id, image};
+      });
       return products;
     }
     catch (error) {
       console.log(error);
-    }
+    }    
   }
 }
 
-// displaying the products 
+// displaying products
 class UI {
   displayProducts(products){
     let result = '';
-    products.forEach(product => {
-      result += `<!-- single product-->
+    products.forEach(product =>{
+      result += ` <!-- single product-->
       <article class="product">
         <div class="img-container">
           <img
@@ -55,64 +54,29 @@ class UI {
           </button>
         </div>
         <h3>${product.title}</h3>
-        <h4>$${product.price}</h4>
+        <h4>$${product.price} </h4>
       </article>
       <!-- end of the single product-->`
     });
     productsDOM.innerHTML = result;
   }
-  getBagButtons() {
-    const buttons = [...document.querySelectorAll('.bag-btn')];
-   // buttonsDOM = buttons;
-    console.log(buttons)
-    buttons.forEach(button =>{
-      let id = button.dataset.id;
-      let inCart = cart.find(item => item.id === id); 
-     // console.log(inCart); // undefined
-     if(inCart){
-       button.innerText = 'In Cart';
-       button.disabled = true;
-     }
-     else {
-       button.addEventListener('click', (event)=>{
-         event.target.innerText = 'In Cart';
-         event.target.disabled = true;
-         // get products from product
-         let cartItem = Storage.getProduct(id);
-         console.log(cartItem)
-         // add product to the cart
-         // save cart in local storage
-         // set cart values
-         // display cart item
-         // show the cart
-       })
-     }
-    })
-  }
+
 }
 
-// storage 
+// storage
 class Storage {
-  static saveProducts(products) {
-  localStorage.setItem('products', JSON.stringify(products));
-  }
-  static getProduct(id){
-    let products = JSON.parse(localStorage.getItem('products'));
-    return products.find(product => product.id === id)
+  static saveProducts(){
+    localStorage.setItem('products', JSON.stringify(products))
   }
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
-  const ui = new UI();
   const products = new Products();
+  const ui = new UI();
 
   products.getProducts().then(products => {
-    ui.displayProducts(products);
-    Storage.saveProducts(products);
-  }).then(() =>{
-    ui.getBagButtons()
-  })
-
-   
+    ui.displayProducts(products)
+    Storage.saveProducts(products)
+  });
 })
+
