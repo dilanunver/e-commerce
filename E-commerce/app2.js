@@ -11,6 +11,8 @@ const productsDOM = document.querySelector('.products-center');
 
 // cart
 let cart = [];
+// buttons
+let buttonsDOM = [];
 
 
 // getting products
@@ -60,14 +62,64 @@ class UI {
     });
     productsDOM.innerHTML = result;
   }
+  getBagButtons(){
+    const buttons = [...document.querySelectorAll('.bag-btn')];
+    buttonsDOM = buttons;
+    buttons.forEach(button => {
+      let id = button.dataset.id;
+      let inCart = cart.find(item => item.id === id);
+
+      if(inCart){
+        button.innerText = 'In Cart';
+        button.disabled = true; 
+      } 
+      else {
+        button.addEventListener('click', (event) => {
+          event.target.innerText = 'In Cart';
+          event.target.disabled = true;
+
+          let cartItem = {...Storage.getProduct(id), amount:1};
+          cart = [...cart, cartItem];
+          
+          Storage.saveCart(cart);
+          console.log(cart);
+          this.setCartValues(cart);
+        })
+      }
+    })
+   // function (event){
+     //event.target.innerText='In Cart'
+  // }
+    
+  }
+  setCartValues(cart){
+    let tempTotal = 0;
+    let itemsTotal = 0;
+    cart.map(item => {
+      tempTotal += item.price * item.amount;
+      itemsTotal += item.amount;
+    })
+    cartTotal.innerText = parseFloat(tempTotal.toFixed(2));
+    cartItems.innerText = itemsTotal;
+    console.log(cartTotal, cartItems)
+
+  }
 
 }
 
 // storage
 class Storage {
-  static saveProducts(){
+  static saveProducts(products){
     localStorage.setItem('products', JSON.stringify(products))
   }
+  static getProduct(id){
+    let products = JSON.parse(localStorage.getItem('products'));
+    return products.find(product => product.id === id)
+  }
+  static saveCart(cart){
+    localStorage.setItem('carts', JSON.stringify(cart));
+  }
+  
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -76,7 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   products.getProducts().then(products => {
     ui.displayProducts(products)
-    Storage.saveProducts(products)
-  });
+    Storage.saveProducts(products);
+  }). then(() => { 
+    (ui.getBagButtons())// then(function(){
+      // ui.getBagButtons()
+    //})
+  })
 })
 
